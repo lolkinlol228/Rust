@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rust Day/Night & Hacking Timer</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: sans-serif;
+            color: #fff;
+            text-align: center;
+            transition: background-color 1s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .day-theme {
+            background-color: #5aacef;
+        }
+
+        .night-theme {
+            background-color: #1a2b42;
+        }
+
+        .container {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        h1, h2 {
+            margin-top: 0;
+        }
+
+        .timer-display {
+            font-size: 2.5em;
+            font-family: 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            margin: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .day-button {
+            background-color: #ffda6b;
+            color: #333;
+        }
+
+        .night-button {
+            background-color: #6b6b9d;
+            color: #fff;
+        }
+
+        .hacking-button {
+            background-color: #ff6b6b;
+            color: #fff;
+        }
+
+        .icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .manual-override {
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+
+        .manual-override input {
+            padding: 5px;
+            margin-right: 5px;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+            width: 80px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="night-theme">
+
+    <div class="container">
+        <h1>Rust Day/Night Timer</h1>
+        <div id="dayNightIcon" class="icon">🌙</div>
+        <div id="dayNightTimer" class="timer-display">00:00:000</div>
+        <button id="startNightBtn" class="night-button">Синхронизировать с Ночью</button>
+        <div class="manual-override">
+            <label for="manualDayNightTime">Установить ост. время (ММ:СС):</label>
+            <input type="text" id="manualDayNightTime" placeholder="15:00">
+            <button id="setDayNightTimeBtn">Установить</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Таймер Взлома</h2>
+        <div id="hackingTimer" class="timer-display">00:00:000</div>
+        <button id="startHackingBtn" class="hacking-button">Начать Взлом (15 мин)</button>
+        <div class="manual-override">
+            <label for="manualHackingTime">Установить ост. время (ММ:СС):</label>
+            <input type="text" id="manualHackingTime" placeholder="15:00">
+            <button id="setHackingTimeBtn">Установить</button>
+        </div>
+    </div>
+
+    <script>
+        const dayNightTimerDisplay = document.getElementById('dayNightTimer');
+        const hackingTimerDisplay = document.getElementById('hackingTimer');
+        const dayNightIcon = document.getElementById('dayNightIcon');
+        const startNightBtn = document.getElementById('startNightBtn');
+        const hackingBtn = document.getElementById('startHackingBtn');
+        const manualDayNightTimeInput = document.getElementById('manualDayNightTime');
+        const setDayNightTimeBtn = document.getElementById('setDayNightTimeBtn');
+        const manualHackingTimeInput = document.getElementById('manualHackingTime');
+        const setHackingTimeBtn = document.getElementById('setHackingTimeBtn');
+        const body = document.body;
+
+        const NIGHT_DURATION_MS = 15 * 60 * 1000;
+        const DAY_DURATION_MS = 30 * 60 * 1000;
+        const CYCLE_DURATION_MS = NIGHT_DURATION_MS + DAY_DURATION_MS; // 45 минут
+        const HACKING_DURATION_MS = 15 * 60 * 1000;
+
+        let currentPhase = 'night';
+        let phaseStartTime = Date.now();
+        let phaseDuration = NIGHT_DURATION_MS;
+
+        let hackingTimerRunning = false;
+        let hackingStartTime = 0;
+        let hackingDuration = HACKING_DURATION_MS;
+
+        const STORAGE_KEY = 'rustTimerState';
+
+        function saveState() {
+            try {
+                const state = {
+                    phaseStartTime: phaseStartTime,
+                    currentPhase: currentPhase,
+                    phaseDuration: phaseDuration
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {
+                console.error("Ошибка сохранения в localStorage:", e);
+            }
+        }
+
+        function loadState() {
+            try {
+                const savedState = localStorage.getItem(STORAGE_KEY);
+                if (savedState) {
+                    const state = JSON.parse(savedState);
+                    const now = Date.now();
+                    const totalElapsedSinceSave = now - state.phaseStartTime;
+
+                    const timeIntoCycle = totalElapsedSinceSave % CYCLE_DURATION_MS;
+
+                    if (timeIntoCycle < NIGHT_DURATION_MS) {
+                        currentPhase = 'night';
+                        phaseDuration = NIGHT_DURATION_MS;
+                        // Пересчитываем phaseStartTime для текущего реального момента
+                        phaseStartTime = now - timeIntoCycle;
+                    } else {
+                        currentPhase = 'day';
+                        phaseDuration = DAY_DURATION_MS;
+                         // Пересчитываем phaseStartTime для текущего реального момента
+                        phaseStartTime = now - timeIntoCycle;
+                    }
+
+                    updateVisuals();
+                    return true; // Состояние успешно загружено
+                }
+            } catch (e) {
+                console.error("Ошибка загрузки из localStorage:", e);
+            }
+            return false; // Состояние не найдено или ошибка
+        }
+
+        function formatTime(ms) {
+            if (ms < 0) ms = 0;
+            const totalSeconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            const milliseconds = Math.floor(ms % 1000);
+
+            const paddedMinutes = String(minutes).padStart(2, '0');
+            const paddedSeconds = String(seconds).padStart(2, '0');
+            const paddedMilliseconds = String(milliseconds).padStart(3, '0');
+
+            return `${paddedMinutes}:${paddedSeconds}:${paddedMilliseconds}`;
+        }
+
+        function parseTimeToMs(timeString) {
+            const parts = timeString.split(':');
+            let ms = 0;
+            if (parts.length === 2) {
+                const minutes = parseInt(parts[0], 10);
+                const seconds = parseInt(parts[1], 10);
+                if (!isNaN(minutes) && !isNaN(seconds)) {
+                    ms = (minutes * 60 + seconds) * 1000;
+                }
+            } else if (parts.length === 1) {
+                 const seconds = parseInt(parts[0], 10);
+                 if (!isNaN(seconds)) {
+                     ms = seconds * 1000;
+                 }
+            }
+             return ms >= 0 ? ms : 0;
+        }
+
+        function updateDayNightTimer() {
+            const now = Date.now();
+            const elapsed = now - phaseStartTime;
+            let remaining = phaseDuration - elapsed;
+
+            if (remaining <= 0) {
+                if (currentPhase === 'night') {
+                    currentPhase = 'day';
+                    phaseDuration = DAY_DURATION_MS;
+                    phaseStartTime = now;
+                } else {
+                    currentPhase = 'night';
+                    phaseDuration = NIGHT_DURATION_MS;
+                    phaseStartTime = now;
+                }
+                remaining = phaseDuration;
+                updateVisuals();
+                saveState();
+            }
+
+            dayNightTimerDisplay.textContent = formatTime(remaining);
+        }
+
+        function updateVisuals() {
+            if (currentPhase === 'day') {
+                body.classList.remove('night-theme');
+                body.classList.add('day-theme');
+                dayNightIcon.textContent = '☀️';
+            } else {
+                body.classList.remove('day-theme');
+                body.classList.add('night-theme');
+                dayNightIcon.textContent = '🌙';
+            }
+        }
+
+        function startNightCycle() {
+             currentPhase = 'night';
+             phaseDuration = NIGHT_DURATION_MS;
+             phaseStartTime = Date.now();
+             updateVisuals();
+             saveState();
+        }
+
+        function updateHackingTimer() {
+            if (!hackingTimerRunning) {
+                hackingTimerDisplay.textContent = formatTime(0);
+                return;
+            }
+
+            const elapsed = Date.now() - hackingStartTime;
+            let remaining = hackingDuration - elapsed;
+
+            if (remaining <= 0) {
+                remaining = 0;
+                hackingTimerRunning = false;
+                hackingTimerDisplay.textContent = formatTime(remaining);
+                // Тут можно добавить звук или уведомление для взлома
+                return;
+            }
+
+            hackingTimerDisplay.textContent = formatTime(remaining);
+        }
+
+        function startHackingTimer() {
+            hackingTimerRunning = true;
+            hackingStartTime = Date.now();
+            hackingDuration = HACKING_DURATION_MS;
+        }
+
+        function setDayNightManualTime() {
+            const timeString = manualDayNightTimeInput.value;
+            const msToSet = parseTimeToMs(timeString);
+            if (msToSet > 0) {
+                 phaseStartTime = Date.now() - (phaseDuration - msToSet);
+                 saveState();
+            }
+             manualDayNightTimeInput.value = '';
+        }
+
+         function setHackingManualTime() {
+            const timeString = manualHackingTimeInput.value;
+            const msToSet = parseTimeToMs(timeString);
+            if (msToSet >= 0) {
+                 hackingDuration = msToSet;
+                 hackingStartTime = Date.now();
+                 hackingTimerRunning = true;
+            }
+            manualHackingTimeInput.value = '';
+         }
+
+        if (!loadState()) {
+            // Если состояние не загружено (первый запуск или ошибка),
+            // Инициализируем начальное состояние (ночь) и сохраняем его.
+            startNightCycle(); // Это также вызывает saveState()
+        }
+
+
+        setInterval(updateDayNightTimer, 10);
+        setInterval(updateHackingTimer, 10);
+
+        startNightBtn.addEventListener('click', startNightCycle);
+        hackingBtn.addEventListener('click', startHackingTimer);
+        setDayNightTimeBtn.addEventListener('click', setDayNightManualTime);
+        setHackingTimeBtn.addEventListener('click', setHackingManualTime);
+
+    </script>
+
+</body>
+</html>

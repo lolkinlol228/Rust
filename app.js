@@ -4,6 +4,11 @@ const $  = (s, r=document) => r.querySelector(s);
 const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
 const fmt = n => n.toLocaleString('ru-RU');
 
+// иконка предмета из /icons (по shortname, без .webp)
+const ICON = (name, cls='ico') => name ? `<img class="${cls}" src="icons/${name}.webp" alt="">` : '';
+// маленькая иконка серы — заменяет слово «серы»
+const SULF = `<img class="ico-sm" src="icons/sulfur.webp" alt="серы" title="сера">`;
+
 /* ---------- Tabs ---------- */
 $$('nav.tabs button').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -41,8 +46,9 @@ function renderRaidTable(filter='Все'){
     const tr = document.createElement('tr');
 
     let cells = `<td class="name">
-        <span class="tier-dot t-${tierName[s.tier]}"></span>${s.name}
-        <span class="hp">${fmt(s.hp)} HP</span>
+        ${ICON(s.icon)}
+        <span class="tier-dot t-${tierName[s.tier]}"></span>
+        <span class="namecol">${s.name}<span class="hp">${fmt(s.hp)} HP</span></span>
       </td>`;
 
     METHODS.forEach(m => {
@@ -52,7 +58,7 @@ function renderRaidTable(filter='Все'){
       const isBest = best && best.key === m.key;
       cells += `<td>
         <span class="cell-num ${isBest?'best':''}">${fmt(c)} шт${isBest?'<span class="best-tag">выгодно</span>':''}</span>
-        <span class="cell-sub">${fmt(sulfur)} серы</span>
+        <span class="cell-sub">${fmt(sulfur)} ${SULF}</span>
       </td>`;
     });
 
@@ -82,7 +88,7 @@ function renderMeleeWall(){
   const tbody = $('#melee-wall-body');
   MELEE_WALL.rows.forEach(r => {
     tbody.insertAdjacentHTML('beforeend', `<tr>
-      <td class="name">${r.tool}</td>
+      <td class="name">${ICON(r.icon)}<span class="namecol">${r.tool}</span></td>
       <td class="cell-num">${r.hits}</td>
       <td>${r.need}</td>
       <td>${r.craft}</td>
@@ -94,7 +100,7 @@ function renderMeleeDoor(){
   const tbody = $('#melee-door-body');
   MELEE_DOOR.rows.forEach(r => {
     tbody.insertAdjacentHTML('beforeend', `<tr>
-      <td class="name">${r.tool}</td>
+      <td class="name">${ICON(r.icon)}<span class="namecol">${r.tool}</span></td>
       <td class="cell-num">${r.hits}</td>
       <td style="color:var(--muted)">${r.note||''}</td>
     </tr>`);
@@ -109,8 +115,8 @@ function renderCrafting(){
   const tbody = $('#craft-body');
   CRAFTING.forEach(c => {
     tbody.insertAdjacentHTML('beforeend', `<tr>
-      <td class="name">${c.item}</td>
-      <td><span class="cell-num" style="color:var(--yellow)">${fmt(c.sulfur)}</span> серы</td>
+      <td class="name">${ICON(c.icon)}<span class="namecol">${c.item}</span></td>
+      <td><span class="cell-num" style="color:var(--yellow)">${fmt(c.sulfur)}</span> ${SULF}</td>
       <td>${c.parts}</td>
       <td>${c.wb}</td>
       <td style="color:var(--muted)">${c.note}</td>
@@ -121,7 +127,7 @@ function renderUpgrade(){
   const tbody = $('#upgrade-body');
   UPGRADE.forEach(u => {
     tbody.insertAdjacentHTML('beforeend', `<tr>
-      <td class="name">${u.tier}</td>
+      <td class="name">${ICON(u.icon)}<span class="namecol">${u.tier}</span></td>
       <td class="cell-num">${fmt(u.hp)} HP</td>
       <td>${u.cost}</td>
     </tr>`);
@@ -167,7 +173,7 @@ function renderCart(){
   cart.forEach((c, i) => {
     const s = STRUCTURES.find(x => x.id === c.id);
     box.insertAdjacentHTML('beforeend', `<div class="cart-item">
-      <span><b>${c.qty}×</b> ${s.name}</span>
+      <span>${ICON(s.icon,'ico-sm')} <b>${c.qty}×</b> ${s.name}</span>
       <button class="btn ghost mini" data-rm="${i}">убрать</button>
     </div>`);
   });
@@ -208,7 +214,7 @@ function calculate(){
 
   let html = `<div class="total-sulfur">
       Минимум серы (оптимальный микс по каждому объекту):
-      <div class="num">${fmt(mixSulfur)} серы</div>
+      <div class="num">${fmt(mixSulfur)} ${SULF}</div>
     </div>`;
 
   html += '<h3 style="margin:16px 0 10px">Если ломать одним типом бума:</h3><div class="result-grid">';
@@ -217,9 +223,10 @@ function calculate(){
     if (!t.possible) return;
     const win = m.key === best;
     html += `<div class="result-card ${win?'win':''}">
+      ${ICON(m.icon)}
       <div class="big">${fmt(t.count)}</div>
       <div class="lbl">${m.label}</div>
-      <div class="sub">${fmt(t.sulfur)} серы${win?' ✓ дешевле всего':''}</div>
+      <div class="sub">${fmt(t.sulfur)} ${SULF}${win?' ✓ дешевле всего':''}</div>
     </div>`;
   });
   html += '</div>';

@@ -43,14 +43,17 @@ const STRUCTURES = [
   { id:'garage-door', name:'Гаражная дверь', cat:'Двери', tier:'metal', hp:600, icon:'wall.frame.garagedoor',
     counts:{ satchel:9, c4:2, rocket:3, ammo:152 } },
 
-  { id:'armored-door', name:'Бронированная дверь', cat:'Двери', tier:'hqm', hp:800, icon:'door.hinged.toptier',
+  { id:'armored-door', name:'Бронированная дверь', cat:'Двери', tier:'hqm', hp:1000, icon:'door.hinged.toptier',
     counts:{ satchel:15, c4:3, rocket:5, ammo:251 } },
 
-  { id:'armored-double-door', name:'Двойная бронированная дверь (МВК)', cat:'Двери', tier:'hqm', hp:800, icon:'door.hinged.toptier',
+  { id:'armored-double-door', name:'Двойная бронированная дверь (МВК)', cat:'Двери', tier:'hqm', hp:1000, icon:'door.hinged.toptier',
     counts:{ satchel:15, c4:3, rocket:5, ammo:251 } },
 
-  { id:'ladder-hatch', name:'Люк под лестницу', cat:'Двери', tier:'metal', hp:200, icon:'floor.ladder.hatch',
+  { id:'ladder-hatch', name:'Люк под лестницу', cat:'Двери', tier:'metal', hp:250, icon:'floor.ladder.hatch',
     counts:{ satchel:4, c4:1, rocket:1, ammo:64 } },
+
+  { id:'armored-ladder-hatch', name:'Бронированный люк под лестницу (МВК)', cat:'Двери', tier:'hqm', hp:1000, icon:'floor.ladder.hatch',
+    counts:{ satchel:15, c4:3, rocket:5, ammo:251 } },
 
   // ---- СТЕНЫ ---- (у стен нет иконки-предмета — берём иконку материала тира)
   { id:'twig-wall', name:'Соломенная стена (twig)', cat:'Стены', tier:'twig', hp:10, icon:'wood',

@@ -86,12 +86,17 @@ renderRaidTable();
 /* ============================ MELEE TABLES ============================ */
 function renderMeleeWall(){
   const tbody = $('#melee-wall-body');
+  const noteEl = $('#melee-wall-note');
+  if (noteEl) noteEl.innerHTML = '<b>Мягкая vs твёрдая:</b> ' + MELEE_WALL.note;
   MELEE_WALL.rows.forEach(r => {
+    const hard = (typeof r.hard === 'number')
+      ? `<span class="cell-num">${r.hard}</span>`
+      : `<span class="muted-cell">${r.hard}</span>`;
     tbody.insertAdjacentHTML('beforeend', `<tr>
       <td class="name">${ICON(r.icon)}<span class="namecol">${r.tool}</span></td>
-      <td class="cell-num">${r.hits}</td>
+      <td><span class="cell-num best">${r.soft}</span></td>
+      <td>${hard}</td>
       <td>${r.need}</td>
-      <td>${r.craft}</td>
       <td style="color:var(--muted)">${r.note||''}</td>
     </tr>`);
   });
@@ -101,11 +106,11 @@ function renderMeleeDoor(){
   MELEE_DOOR.rows.forEach(r => {
     tbody.insertAdjacentHTML('beforeend', `<tr>
       <td class="name">${ICON(r.icon)}<span class="namecol">${r.tool}</span></td>
-      <td class="cell-num">${r.hits}</td>
+      <td class="cell-num">${r.spend}</td>
       <td style="color:var(--muted)">${r.note||''}</td>
     </tr>`);
   });
-  $('#melee-door-tip').textContent = MELEE_DOOR.tip;
+  $('#melee-door-tip').innerHTML = '<b>Совет:</b> ' + MELEE_DOOR.tip;
 }
 renderMeleeWall();
 renderMeleeDoor();
@@ -137,7 +142,39 @@ renderCrafting();
 renderUpgrade();
 
 /* ============================ CALCULATOR ============================ */
-const cart = [];   // { id, qty }
+const cart = [];                                    // { id, qty }
+const enabled = new Set(METHODS.map(m => m.key));   // какие типы взрывчатки разрешены
+
+// чекбоксы «чем можно рейдить»
+function buildMethodToggles(){
+  const box = $('#calc-methods');
+  box.innerHTML = '';
+  METHODS.forEach(m => {
+    box.insertAdjacentHTML('beforeend', `<label class="mtoggle">
+      <input type="checkbox" value="${m.key}" checked>
+      ${ICON(m.icon,'ico-sm')} ${m.label}
+    </label>`);
+  });
+  $$('#calc-methods input').forEach(cb => cb.onchange = () => {
+    cb.checked ? enabled.add(cb.value) : enabled.delete(cb.value);
+    cb.closest('.mtoggle').classList.toggle('off', !cb.checked);
+    calculate();
+  });
+}
+buildMethodToggles();
+
+// самый дешёвый РАЗРЕШЁННЫЙ метод для постройки
+function cheapestEnabled(s){
+  let best = null;
+  METHODS.forEach(m => {
+    if (!enabled.has(m.key)) return;
+    const c = s.counts[m.key];
+    if (c == null) return;
+    const sulfur = c * SULFUR[m.key];
+    if (!best || sulfur < best.sulfur) best = { key:m.key, count:c, sulfur };
+  });
+  return best;
+}
 
 function buildSelect(){
   const sel = $('#calc-select');
@@ -184,52 +221,87 @@ function renderCart(){
 function calculate(){
   const out = $('#calc-result');
   if (!cart.length){ out.innerHTML = ''; return; }
+  if (!enabled.size){ out.innerHTML = '<div class="note warn"><b>Выбери хотя бы один тип взрывчатки галочкой.</b></div>'; return; }
 
-  // суммируем количество по каждому методу (если метод применим ко всем объектам)
-  const totals = {};
-  METHODS.forEach(m => totals[m.key] = { count:0, sulfur:0, possible:true });
-
-  // оптимальный микс: для каждого объекта берём самый дешёвый способ
+  // КОМБИНИРОВАННЫЙ список (микс): по каждому объекту — самый дешёвый разрешённый тип
+  const combined = {};      // key -> суммарное кол-во
   let mixSulfur = 0;
+  const perItem = [];
 
   cart.forEach(c => {
     const s = STRUCTURES.find(x => x.id === c.id);
-    const cm = cheapestMethod(s);
-    if (cm) mixSulfur += cm.sulfur * c.qty;
-    METHODS.forEach(m => {
-      const unit = s.counts[m.key];
-      if (unit == null){ totals[m.key].possible = false; return; }
-      totals[m.key].count  += unit * c.qty;
-      totals[m.key].sulfur += unit * SULFUR[m.key] * c.qty;
+    const cm = cheapestEnabled(s);
+    if (!cm) return;
+    const count = cm.count * c.qty, sulfur = cm.sulfur * c.qty;
+    combined[cm.key] = (combined[cm.key] || 0) + count;
+    mixSulfur += sulfur;
+    const m = METHODS.find(x => x.key === cm.key);
+    perItem.push({ name:s.name, icon:s.icon, qty:c.qty, mShort:m.short, mIcon:m.icon, count, sulfur });
+  });
+
+  // итоги по каждому РАЗРЕШЁННОМУ методу (один тип на всё) — для сравнения
+  const totals = {};
+  METHODS.forEach(m => { if (enabled.has(m.key)) totals[m.key] = { count:0, sulfur:0, possible:true }; });
+  cart.forEach(c => {
+    const s = STRUCTURES.find(x => x.id === c.id);
+    Object.keys(totals).forEach(k => {
+      const unit = s.counts[k];
+      if (unit == null){ totals[k].possible = false; return; }
+      totals[k].count  += unit * c.qty;
+      totals[k].sulfur += unit * SULFUR[k] * c.qty;
     });
   });
-
-  // самый дешёвый единый метод (один тип бума на всё)
   let best = null;
-  METHODS.forEach(m => {
-    const t = totals[m.key];
-    if (!t.possible) return;
-    if (!best || t.sulfur < totals[best].sulfur) best = m.key;
-  });
+  Object.keys(totals).forEach(k => { if (totals[k].possible && (!best || totals[k].sulfur < totals[best].sulfur)) best = k; });
 
+  // ---------- вывод ----------
   let html = `<div class="total-sulfur">
-      Минимум серы (оптимальный микс по каждому объекту):
+      Минимум серы (микс из выбранных типов):
       <div class="num">${fmt(mixSulfur)} ${SULF}</div>
     </div>`;
 
-  html += '<h3 style="margin:16px 0 10px">Если ломать одним типом бума:</h3><div class="result-grid">';
+  // комбинированный шопинг-лист
+  html += '<h3 class="res-h">🛒 Что купить (микс):</h3><div class="result-grid">';
   METHODS.forEach(m => {
-    const t = totals[m.key];
-    if (!t.possible) return;
-    const win = m.key === best;
-    html += `<div class="result-card ${win?'win':''}">
+    if (combined[m.key] == null) return;
+    const cnt = combined[m.key];
+    html += `<div class="result-card win">
       ${ICON(m.icon)}
-      <div class="big">${fmt(t.count)}</div>
+      <div class="big">${fmt(cnt)}</div>
       <div class="lbl">${m.label}</div>
-      <div class="sub">${fmt(t.sulfur)} ${SULF}${win?' ✓ дешевле всего':''}</div>
+      <div class="sub">${fmt(cnt * SULFUR[m.key])} ${SULF}</div>
     </div>`;
   });
   html += '</div>';
+
+  // разбивка по объектам
+  html += '<h3 class="res-h">По объектам:</h3><div class="peritem">';
+  perItem.forEach(p => {
+    html += `<div class="cart-item">
+      <span>${ICON(p.icon,'ico-sm')} <b>${p.qty}×</b> ${p.name}</span>
+      <span class="pi-method">${ICON(p.mIcon,'ico-sm')} ${fmt(p.count)} ${p.mShort} · ${fmt(p.sulfur)} ${SULF}</span>
+    </div>`;
+  });
+  html += '</div>';
+
+  // сравнение «один тип на всё» (если доступно больше одного типа)
+  const single = Object.keys(totals).filter(k => totals[k].possible);
+  if (single.length > 1){
+    html += '<h3 class="res-h">Если ломать одним типом:</h3><div class="result-grid">';
+    single.forEach(k => {
+      const m = METHODS.find(x => x.key === k), t = totals[k], win = k === best;
+      html += `<div class="result-card ${win?'win':''}">
+        ${ICON(m.icon)}
+        <div class="big">${fmt(t.count)}</div>
+        <div class="lbl">${m.label}</div>
+        <div class="sub">${fmt(t.sulfur)} ${SULF}${win?' ✓':''}</div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  html += '<p class="hint" style="margin-top:12px">Микс берёт для каждого объекта самый дешёвый из разрешённых типов. Внутри одного объекта мешать типы смысла нет — 100% самого дешёвого типа всегда выгоднее.</p>';
+
   out.innerHTML = html;
 }
 

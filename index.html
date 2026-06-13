@@ -59,9 +59,12 @@
   <!-- ============ CALCULATOR ============ -->
   <section id="tab-calc" class="tab-page">
     <h2 class="section">Калькулятор рейда</h2>
-    <p class="hint">Добавь, что хочешь снести — посчитаю, сколько нужно взрывчатки и серы каждым способом, и подскажу самый дешёвый.</p>
+    <p class="hint">Добавь, что хочешь снести — посчитаю самый дешёвый <b>микс</b> взрывчатки и общую цену в сере. Галочками выбери, чем ты готов рейдить.</p>
 
     <div class="panel">
+      <div class="calc-label">Чем можно рейдить:</div>
+      <div class="calc-methods" id="calc-methods"></div>
+
       <div class="calc-row">
         <select id="calc-select"></select>
         <input type="number" id="calc-qty" value="1" min="1" title="Количество">
@@ -76,22 +79,24 @@
 
   <!-- ============ MELEE ============ -->
   <section id="tab-melee" class="tab-page">
-    <h2 class="section">Soft-side рейд: деревянная стена</h2>
-    <p class="hint">Мягкая (внутренняя) сторона деревянной стены получает больше урона. Это самый дешёвый рейд — без серы, только дерево/инструменты.</p>
+    <h2 class="section">Ближний бой: деревянная стена (250 HP)</h2>
+    <p class="hint">Сколько ударов до разрушения. Бей по <b>мягкой</b> стороне — это самый дешёвый рейд, без серы.</p>
+    <div class="note" id="melee-wall-note"></div>
 
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Инструмент</th><th>Ударов</th><th>Сколько нужно</th><th>Крафт</th><th>Комментарий</th></tr>
+          <tr><th>Инструмент</th><th>🟢 Мягкая сторона</th><th>🔴 Твёрдая сторона</th><th>Расход</th><th>Комментарий</th></tr>
         </thead>
         <tbody id="melee-wall-body"></tbody>
       </table>
     </div>
 
-    <h2 class="section">Деревянная дверь</h2>
+    <h2 class="section">Деревянная дверь (200 HP)</h2>
+    <p class="hint">У двери нет мягкой стороны — миллить дорого. «Расход» = сколько инструментов сточишь или ударов.</p>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Инструмент</th><th>Ударов</th><th>Комментарий</th></tr></thead>
+        <thead><tr><th>Инструмент</th><th>Расход</th><th>Комментарий</th></tr></thead>
         <tbody id="melee-door-body"></tbody>
       </table>
     </div>

@@ -113,6 +113,7 @@ thead th .ico-sm{vertical-align:-2px;margin-right:2px}
 .cart-item .ico-sm{width:22px;height:22px;vertical-align:-6px;margin-right:2px}
 .cell-num{font-variant-numeric:tabular-nums;font-weight:700}
 .cell-sub{display:block;color:var(--muted);font-size:.78em;font-weight:400}
+.muted-cell{color:var(--muted);font-size:.85em;font-style:italic}
 .best{color:var(--green) !important}
 .best-tag{
   display:inline-block;font-size:.62em;background:var(--green);color:#10240a;
@@ -159,6 +160,21 @@ thead th .ico-sm{vertical-align:-2px;margin-right:2px}
   border:1px solid var(--yellow);
 }
 .total-sulfur .num{font-size:2em;font-weight:800;color:var(--yellow)}
+
+/* method toggles */
+.calc-label{font-size:.82em;color:var(--muted);margin-bottom:7px}
+.calc-methods{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.mtoggle{
+  display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none;
+  background:var(--panel2);border:1px solid var(--accent2);border-radius:99px;
+  padding:7px 14px;font-size:.86em;font-weight:600;transition:.15s;color:var(--text);
+}
+.mtoggle input{accent-color:var(--accent2);width:15px;height:15px;cursor:pointer;margin:0}
+.mtoggle.off{border-color:var(--border);color:var(--muted);opacity:.6}
+.res-h{margin:18px 0 10px;font-size:1.05em}
+.peritem{display:flex;flex-direction:column;gap:6px}
+.pi-method{color:var(--accent2);font-weight:600;font-size:.92em;white-space:nowrap}
+.cart-item .pi-method .ico-sm{vertical-align:-3px}
 
 /* ---------- Timers ---------- */
 .timer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}

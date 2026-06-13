@@ -31,13 +31,22 @@ const STRUCTURES = [
   { id:'wood-door', name:'Деревянная дверь', cat:'Двери', tier:'wood', hp:200, icon:'door.hinged.wood',
     counts:{ satchel:2, c4:1, rocket:1, ammo:18, beancan:9 } },
 
+  { id:'wood-double-door', name:'Двойная деревянная дверь', cat:'Двери', tier:'wood', hp:200, icon:'door.hinged.wood',
+    counts:{ satchel:2, c4:1, rocket:1, ammo:18, beancan:9 } },
+
   { id:'metal-door', name:'Железная дверь', cat:'Двери', tier:'metal', hp:250, icon:'door.hinged.metal',
+    counts:{ satchel:4, c4:1, rocket:1, ammo:63 } },
+
+  { id:'metal-double-door', name:'Двойная железная дверь', cat:'Двери', tier:'metal', hp:250, icon:'door.hinged.metal',
     counts:{ satchel:4, c4:1, rocket:1, ammo:63 } },
 
   { id:'garage-door', name:'Гаражная дверь', cat:'Двери', tier:'metal', hp:600, icon:'wall.frame.garagedoor',
     counts:{ satchel:9, c4:2, rocket:3, ammo:152 } },
 
   { id:'armored-door', name:'Бронированная дверь', cat:'Двери', tier:'hqm', hp:800, icon:'door.hinged.toptier',
+    counts:{ satchel:15, c4:3, rocket:5, ammo:251 } },
+
+  { id:'armored-double-door', name:'Двойная бронированная дверь (МВК)', cat:'Двери', tier:'hqm', hp:800, icon:'door.hinged.toptier',
     counts:{ satchel:15, c4:3, rocket:5, ammo:251 } },
 
   { id:'ladder-hatch', name:'Люк под лестницу', cat:'Двери', tier:'metal', hp:200, icon:'floor.ladder.hatch',
@@ -82,7 +91,7 @@ const MELEE_WALL = {
     { tool:'Отбойный молоток',         icon:'jackhammer',   soft:22,  hard:'~220',      need:'низкосорт. топливо',      note:'Электро-инструмент' },
     { tool:'Боевой нож',               icon:'knife.combat', soft:37,  hard:'невыгодно', need:'1 шт',                    note:'Тихо' },
     { tool:'Деревянное копьё',         icon:'spear.wooden', soft:59,  hard:'невыгодно', need:'≈5 копий (≈1500 дерева)', note:'Самый дешёвый, тихий' },
-    { tool:'Каменное копьё',           icon:'spear.stone',  soft:65,  hard:'невыгодно', need:'≈4 копья',                note:'Прочнее деревянного' },
+    { tool:'Каменное копьё',           icon:'spear.stone',  soft:65,  hard:'невыгодно', need:'≈4 копья (≈1200 дерева + 80 камня)', note:'Прочнее деревянного' },
     { tool:'Камень (Rock)',            icon:'rock',         soft:368, hard:'невыгодно', need:'1 шт',                    note:'Очень долго' }
   ]
 };
@@ -104,7 +113,7 @@ const MELEE_DOOR = {
     { tool:'Боевой нож',           icon:'knife.combat',     spend:'≈50 ножей',   note:'Очень долго' },
     { tool:'Костяной нож',         icon:'knife.bone',       spend:'≈67 ножей',   note:'' },
     { tool:'Камень (Rock)',        icon:'rock',             spend:'200 ударов',  note:'Не ломается, но вечность' },
-    { tool:'Деревянное копьё',     icon:'spear.wooden',     spend:'≈100 копий',  note:'Бессмысленно' }
+    { tool:'Деревянное копьё',     icon:'spear.wooden',     spend:'≈100 копий (≈30000 дерева)',  note:'Бессмысленно' }
   ],
   tip:'У двери нет «мягкой» стороны, поэтому миллить её дорого — стачивается куча инструментов. Почти всегда выгоднее проломить мягкую (внутреннюю) сторону деревянной стены рядом с дверью (таблица выше) либо открыть дверь взрывчаткой.'
 };

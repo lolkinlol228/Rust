@@ -1,337 +1,209 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rust Day/Night & Hacking Timer</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: sans-serif;
-            color: #fff;
-            text-align: center;
-            transition: background-color 1s ease;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .day-theme {
-            background-color: #5aacef;
-        }
-
-        .night-theme {
-            background-color: #1a2b42;
-        }
-
-        .container {
-            background-color: rgba(0, 0, 0, 0.3);
-            padding: 30px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            width: 90%;
-            max-width: 500px;
-        }
-
-        h1, h2 {
-            margin-top: 0;
-        }
-
-        .timer-display {
-            font-size: 2.5em;
-            font-family: 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
-            margin: 20px 0;
-            padding: 10px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 1em;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            margin: 5px;
-            transition: background-color 0.3s ease;
-        }
-
-        button:hover {
-            opacity: 0.9;
-        }
-
-        .day-button {
-            background-color: #ffda6b;
-            color: #333;
-        }
-
-        .night-button {
-            background-color: #6b6b9d;
-            color: #fff;
-        }
-
-        .hacking-button {
-            background-color: #ff6b6b;
-            color: #fff;
-        }
-
-        .icon {
-            font-size: 3em;
-            margin-bottom: 10px;
-        }
-
-        .manual-override {
-            margin-top: 15px;
-            font-size: 0.9em;
-        }
-
-        .manual-override input {
-            padding: 5px;
-            margin-right: 5px;
-            border-radius: 3px;
-            border: 1px solid #ccc;
-            width: 80px;
-            text-align: center;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RUST Помощник — Рейд-таблица, калькулятор серы и таймеры</title>
+<link rel="stylesheet" href="styles.css">
 </head>
-<body class="night-theme">
+<body>
 
-    <div class="container">
-        <h1>Rust Day/Night Timer</h1>
-        <div id="dayNightIcon" class="icon">🌙</div>
-        <div id="dayNightTimer" class="timer-display">00:00:000</div>
-        <button id="startNightBtn" class="night-button">Синхронизировать с Ночью</button>
-        <div class="manual-override">
-            <label for="manualDayNightTime">Установить ост. время (ММ:СС):</label>
-            <input type="text" id="manualDayNightTime" placeholder="15:00">
-            <button id="setDayNightTimeBtn">Установить</button>
-        </div>
+<header>
+  <h1>RUST <span class="accent">Помощник</span></h1>
+  <p>Рейд-таблицы, калькулятор серы, ближний бой и таймеры — всё в одном месте</p>
+  <span class="badge">Актуально на 13 июня 2026</span>
+</header>
+
+<nav class="tabs">
+  <button class="active" data-tab="raid">💣 Рейд-таблица</button>
+  <button data-tab="calc">🧮 Калькулятор серы</button>
+  <button data-tab="melee">🔨 Ближний бой</button>
+  <button data-tab="craft">⚒️ Крафт и тиры</button>
+  <button data-tab="timers">⏱️ Таймеры</button>
+</nav>
+
+<main>
+
+  <!-- ============ RAID ============ -->
+  <section id="tab-raid" class="tab-page active">
+    <h2 class="section">Сколько взрывчатки нужно на снос</h2>
+    <p class="hint">Количество — чтобы полностью разрушить объект с самой выгодной стороны.
+      <span class="best">Зелёным</span> отмечен самый дешёвый способ по сере. Серы указано на всё количество.</p>
+
+    <div class="chips" id="raid-chips"></div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Объект</th>
+            <th>Сачели</th>
+            <th>С4</th>
+            <th>Ракеты</th>
+            <th>Взрыв. патроны 5.56</th>
+          </tr>
+        </thead>
+        <tbody id="raid-body"></tbody>
+      </table>
     </div>
 
-    <div class="container">
-        <h2>Таймер Взлома</h2>
-        <div id="hackingTimer" class="timer-display">00:00:000</div>
-        <button id="startHackingBtn" class="hacking-button">Начать Взлом (15 мин)</button>
-        <div class="manual-override">
-            <label for="manualHackingTime">Установить ост. время (ММ:СС):</label>
-            <input type="text" id="manualHackingTime" placeholder="15:00">
-            <button id="setHackingTimeBtn">Установить</button>
-        </div>
+    <div class="note">
+      <b>Подсказка:</b> на дереве и twig дешевле всего ломать <b>ближним боем</b> по мягкой стороне (вкладка «Ближний бой») или взрывными патронами.
+      На камне/металле/HQM выгоднее <b>С4</b>, а ракеты — самый быстрый, но дорогой способ.
+    </div>
+    <div class="note warn">
+      <b>Важно:</b> сачели и бобовые гранаты иногда дают осечку (не взрываются с первого раза) — бери с небольшим запасом.
+    </div>
+  </section>
+
+  <!-- ============ CALCULATOR ============ -->
+  <section id="tab-calc" class="tab-page">
+    <h2 class="section">Калькулятор рейда</h2>
+    <p class="hint">Добавь, что хочешь снести — посчитаю, сколько нужно взрывчатки и серы каждым способом, и подскажу самый дешёвый.</p>
+
+    <div class="panel">
+      <div class="calc-row">
+        <select id="calc-select"></select>
+        <input type="number" id="calc-qty" value="1" min="1" title="Количество">
+        <button class="btn" id="calc-add">+ Добавить</button>
+        <button class="btn ghost" id="calc-clear">Очистить</button>
+      </div>
+      <div id="calc-cart"></div>
     </div>
 
-    <script>
-        const dayNightTimerDisplay = document.getElementById('dayNightTimer');
-        const hackingTimerDisplay = document.getElementById('hackingTimer');
-        const dayNightIcon = document.getElementById('dayNightIcon');
-        const startNightBtn = document.getElementById('startNightBtn');
-        const hackingBtn = document.getElementById('startHackingBtn');
-        const manualDayNightTimeInput = document.getElementById('manualDayNightTime');
-        const setDayNightTimeBtn = document.getElementById('setDayNightTimeBtn');
-        const manualHackingTimeInput = document.getElementById('manualHackingTime');
-        const setHackingTimeBtn = document.getElementById('setHackingTimeBtn');
-        const body = document.body;
+    <div id="calc-result"></div>
+  </section>
 
-        const NIGHT_DURATION_MS = 15 * 60 * 1000;
-        const DAY_DURATION_MS = 30 * 60 * 1000;
-        const CYCLE_DURATION_MS = NIGHT_DURATION_MS + DAY_DURATION_MS; // 45 минут
-        const HACKING_DURATION_MS = 15 * 60 * 1000;
+  <!-- ============ MELEE ============ -->
+  <section id="tab-melee" class="tab-page">
+    <h2 class="section">Soft-side рейд: деревянная стена</h2>
+    <p class="hint">Мягкая (внутренняя) сторона деревянной стены получает больше урона. Это самый дешёвый рейд — без серы, только дерево/инструменты.</p>
 
-        let currentPhase = 'night';
-        let phaseStartTime = Date.now();
-        let phaseDuration = NIGHT_DURATION_MS;
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Инструмент</th><th>Ударов</th><th>Сколько нужно</th><th>Крафт</th><th>Комментарий</th></tr>
+        </thead>
+        <tbody id="melee-wall-body"></tbody>
+      </table>
+    </div>
 
-        let hackingTimerRunning = false;
-        let hackingStartTime = 0;
-        let hackingDuration = HACKING_DURATION_MS;
+    <h2 class="section">Деревянная дверь</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Инструмент</th><th>Ударов</th><th>Комментарий</th></tr></thead>
+        <tbody id="melee-door-body"></tbody>
+      </table>
+    </div>
+    <div class="note" id="melee-door-tip"></div>
 
-        const STORAGE_KEY = 'rustTimerState';
+    <div class="note warn">
+      <b>Про копья:</b> деревянное копьё стоит <b>300 дерева</b> и крафтится 30 сек. На стену с мягкой стороны уходит ~59 ударов (≈5 копий ≈ 1500 дерева).
+      Каменное копьё прочнее, но крафтится из деревянного + 20 камня. Копья — самый тихий и дешёвый способ онлайн-рейда.
+    </div>
+  </section>
 
-        function saveState() {
-            try {
-                const state = {
-                    phaseStartTime: phaseStartTime,
-                    currentPhase: currentPhase,
-                    phaseDuration: phaseDuration
-                };
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            } catch (e) {
-                console.error("Ошибка сохранения в localStorage:", e);
-            }
-        }
+  <!-- ============ CRAFT ============ -->
+  <section id="tab-craft" class="tab-page">
+    <h2 class="section">Крафт взрывчатки</h2>
+    <p class="hint">Цена в сере — это полная цепочка крафта (включая порох). Нужен соответствующий верстак.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Взрывчатка</th><th>Сера</th><th>Состав</th><th>Верстак</th><th>Комментарий</th></tr></thead>
+        <tbody id="craft-body"></tbody>
+      </table>
+    </div>
 
-        function loadState() {
-            try {
-                const savedState = localStorage.getItem(STORAGE_KEY);
-                if (savedState) {
-                    const state = JSON.parse(savedState);
-                    const now = Date.now();
-                    const totalElapsedSinceSave = now - state.phaseStartTime;
+    <h2 class="section">Тиры построек (стена 3×3)</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Тир</th><th>Прочность</th><th>Цена апгрейда</th></tr></thead>
+        <tbody id="upgrade-body"></tbody>
+      </table>
+    </div>
 
-                    const timeIntoCycle = totalElapsedSinceSave % CYCLE_DURATION_MS;
+    <div class="facts-grid" style="margin-top:16px">
+      <div class="fact">
+        <h4>⚡ Быстрые факты</h4>
+        <ul>
+          <li>1 <b>сачель</b> = 4 бобовые гранаты + верёвка + тайник</li>
+          <li>1 <b>С4</b> ≈ <b>2200 серы</b> — самое мощное</li>
+          <li><b>Взрывной патрон</b> = 25 серы, выгоден на металле/HQM</li>
+          <li>Камень и металл имеют <b>сопротивление взрыву</b> — поэтому ракет нужно больше, чем кажется по HP</li>
+        </ul>
+      </div>
+      <div class="fact">
+        <h4>🎯 Что чем рейдить</h4>
+        <ul>
+          <li><b>Twig / дерево:</b> ближний бой, сачели, патроны</li>
+          <li><b>Камень:</b> С4 (дешевле) или ракеты (быстрее)</li>
+          <li><b>Металл:</b> С4</li>
+          <li><b>HQM (броня):</b> С4 — без вариантов по цене</li>
+        </ul>
+      </div>
+      <div class="fact">
+        <h4>🛡️ Защита базы</h4>
+        <ul>
+          <li>Ставь <b>двойные стены</b> (honeycomb) — рейдеру нужно в 2× больше бума</li>
+          <li><b>Бронедверь</b> держит 3 С4 — лучшая дверь</li>
+          <li>Держи <b>апкип</b> заполненным, иначе база начнёт разрушаться сама</li>
+          <li>Прячь <b>TC</b> (шкаф) глубоко — его поиск замедляет рейд</li>
+        </ul>
+      </div>
+    </div>
+  </section>
 
-                    if (timeIntoCycle < NIGHT_DURATION_MS) {
-                        currentPhase = 'night';
-                        phaseDuration = NIGHT_DURATION_MS;
-                        // Пересчитываем phaseStartTime для текущего реального момента
-                        phaseStartTime = now - timeIntoCycle;
-                    } else {
-                        currentPhase = 'day';
-                        phaseDuration = DAY_DURATION_MS;
-                         // Пересчитываем phaseStartTime для текущего реального момента
-                        phaseStartTime = now - timeIntoCycle;
-                    }
+  <!-- ============ TIMERS ============ -->
+  <section id="tab-timers" class="tab-page">
+    <h2 class="section">Таймеры</h2>
+    <p class="hint">День/ночь синхронизируется и сохраняется. Таймер взлома — для хакабельного ящика (15 мин).</p>
 
-                    updateVisuals();
-                    return true; // Состояние успешно загружено
-                }
-            } catch (e) {
-                console.error("Ошибка загрузки из localStorage:", e);
-            }
-            return false; // Состояние не найдено или ошибка
-        }
+    <div class="timer-grid">
 
-        function formatTime(ms) {
-            if (ms < 0) ms = 0;
-            const totalSeconds = Math.floor(ms / 1000);
-            const minutes = Math.floor(totalSeconds / 60);
-            const seconds = totalSeconds % 60;
-            const milliseconds = Math.floor(ms % 1000);
+      <div class="timer-card night" id="dn-card">
+        <div class="icon" id="dn-icon">🌙</div>
+        <h3 id="dn-label">Цикл день / ночь</h3>
+        <div class="timer-display" id="dn-display">00:00</div>
+        <div class="row"><button class="btn mini" id="dn-sync">Синхронизировать с ночью</button></div>
+        <div class="row">
+          <input type="text" id="dn-input" placeholder="ММ:СС">
+          <button class="btn ghost mini" id="dn-set">Задать остаток</button>
+        </div>
+      </div>
 
-            const paddedMinutes = String(minutes).padStart(2, '0');
-            const paddedSeconds = String(seconds).padStart(2, '0');
-            const paddedMilliseconds = String(milliseconds).padStart(3, '0');
+      <div class="timer-card">
+        <div class="icon">🔓</div>
+        <h3>Взлом ящика (Hackable Crate)</h3>
+        <div class="timer-display" id="hack-display">00:00</div>
+        <div class="row"><button class="btn mini" id="hack-start">Старт (15 мин)</button></div>
+      </div>
 
-            return `${paddedMinutes}:${paddedSeconds}:${paddedMilliseconds}`;
-        }
+      <div class="timer-card">
+        <div class="icon">⏲️</div>
+        <h3>Свой таймер</h3>
+        <div class="timer-display" id="custom-display">00:00</div>
+        <div class="row">
+          <input type="text" id="custom-input" placeholder="ММ:СС">
+          <button class="btn mini" id="custom-start">Старт</button>
+        </div>
+      </div>
 
-        function parseTimeToMs(timeString) {
-            const parts = timeString.split(':');
-            let ms = 0;
-            if (parts.length === 2) {
-                const minutes = parseInt(parts[0], 10);
-                const seconds = parseInt(parts[1], 10);
-                if (!isNaN(minutes) && !isNaN(seconds)) {
-                    ms = (minutes * 60 + seconds) * 1000;
-                }
-            } else if (parts.length === 1) {
-                 const seconds = parseInt(parts[0], 10);
-                 if (!isNaN(seconds)) {
-                     ms = seconds * 1000;
-                 }
-            }
-             return ms >= 0 ? ms : 0;
-        }
+    </div>
 
-        function updateDayNightTimer() {
-            const now = Date.now();
-            const elapsed = now - phaseStartTime;
-            let remaining = phaseDuration - elapsed;
+    <div class="note">
+      <b>Зачем:</b> таймер взлома — чтобы прийти к ящику ровно к открытию. Цикл день/ночь — планировать рейды и фарм (ночью тише и темнее).
+    </div>
+  </section>
 
-            if (remaining <= 0) {
-                if (currentPhase === 'night') {
-                    currentPhase = 'day';
-                    phaseDuration = DAY_DURATION_MS;
-                    phaseStartTime = now;
-                } else {
-                    currentPhase = 'night';
-                    phaseDuration = NIGHT_DURATION_MS;
-                    phaseStartTime = now;
-                }
-                remaining = phaseDuration;
-                updateVisuals();
-                saveState();
-            }
+</main>
 
-            dayNightTimerDisplay.textContent = formatTime(remaining);
-        }
+<footer>
+  Данные собраны из rustlabs, wikirust и калькуляторов сообщества (июнь 2026).
+  Цифры могут немного отличаться на модовых серверах (x2, x5 и т.д.).<br>
+  Сделано для личного пользования. Удачных рейдов 🔥
+</footer>
 
-        function updateVisuals() {
-            if (currentPhase === 'day') {
-                body.classList.remove('night-theme');
-                body.classList.add('day-theme');
-                dayNightIcon.textContent = '☀️';
-            } else {
-                body.classList.remove('day-theme');
-                body.classList.add('night-theme');
-                dayNightIcon.textContent = '🌙';
-            }
-        }
-
-        function startNightCycle() {
-             currentPhase = 'night';
-             phaseDuration = NIGHT_DURATION_MS;
-             phaseStartTime = Date.now();
-             updateVisuals();
-             saveState();
-        }
-
-        function updateHackingTimer() {
-            if (!hackingTimerRunning) {
-                hackingTimerDisplay.textContent = formatTime(0);
-                return;
-            }
-
-            const elapsed = Date.now() - hackingStartTime;
-            let remaining = hackingDuration - elapsed;
-
-            if (remaining <= 0) {
-                remaining = 0;
-                hackingTimerRunning = false;
-                hackingTimerDisplay.textContent = formatTime(remaining);
-                // Тут можно добавить звук или уведомление для взлома
-                return;
-            }
-
-            hackingTimerDisplay.textContent = formatTime(remaining);
-        }
-
-        function startHackingTimer() {
-            hackingTimerRunning = true;
-            hackingStartTime = Date.now();
-            hackingDuration = HACKING_DURATION_MS;
-        }
-
-        function setDayNightManualTime() {
-            const timeString = manualDayNightTimeInput.value;
-            const msToSet = parseTimeToMs(timeString);
-            if (msToSet > 0) {
-                 phaseStartTime = Date.now() - (phaseDuration - msToSet);
-                 saveState();
-            }
-             manualDayNightTimeInput.value = '';
-        }
-
-         function setHackingManualTime() {
-            const timeString = manualHackingTimeInput.value;
-            const msToSet = parseTimeToMs(timeString);
-            if (msToSet >= 0) {
-                 hackingDuration = msToSet;
-                 hackingStartTime = Date.now();
-                 hackingTimerRunning = true;
-            }
-            manualHackingTimeInput.value = '';
-         }
-
-        if (!loadState()) {
-            // Если состояние не загружено (первый запуск или ошибка),
-            // Инициализируем начальное состояние (ночь) и сохраняем его.
-            startNightCycle(); // Это также вызывает saveState()
-        }
-
-
-        setInterval(updateDayNightTimer, 10);
-        setInterval(updateHackingTimer, 10);
-
-        startNightBtn.addEventListener('click', startNightCycle);
-        hackingBtn.addEventListener('click', startHackingTimer);
-        setDayNightTimeBtn.addEventListener('click', setDayNightManualTime);
-        setHackingTimeBtn.addEventListener('click', setHackingManualTime);
-
-    </script>
-
+<script src="data.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
